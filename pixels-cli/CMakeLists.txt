@@ -19,6 +19,8 @@ if(Boost_FOUND)
 else()
     message(FATAL_ERROR "Could not find Boost")
 endif()
+# find_package(readline REQUIRED)
+# include_directories(${READLINE_INCLUDE_DIR})
 
 set(pixels_cli_cxx
         main.cpp
@@ -30,3 +32,4 @@ include_directories(include)
 include_directories(../pixels-core/include)
 include_directories(../pixels-common/include)
 target_link_libraries(pixels-cli Boost::program_options Boost::regex pixels-core pixels-common duckdb)
+target_link_libraries(pixels-cli /usr/lib/x86_64-linux-gnu/libreadline.so)
