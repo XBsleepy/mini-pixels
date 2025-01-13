@@ -29,12 +29,13 @@
 #include "encoding/RunLenIntEncoder.h"
 
 class DateColumnWriter : public ColumnWriter{
+    public:
     DateColumnWriter(std::shared_ptr<TypeDescription> type, std::shared_ptr<PixelsWriterOption> writerOption);
 
     int write(std::shared_ptr<ColumnVector> vector, int length) override;
     void close() override;
     void newPixel() override;
-    void writeCurPartTime(std::shared_ptr<ColumnVector> columnVector, long* values, int curPartLength, int curPartOffset);
+    void writeCurPartTime(std::shared_ptr<ColumnVector> columnVector, int* values, int curPartLength, int curPartOffset);
     bool decideNullsPadding(std::shared_ptr<PixelsWriterOption> writerOption) override;
     pixels::proto::ColumnEncoding getColumnChunkEncoding() const;
 

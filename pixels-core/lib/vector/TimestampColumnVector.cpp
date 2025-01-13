@@ -17,7 +17,35 @@ TimestampColumnVector::TimestampColumnVector(uint64_t len, int precision, bool e
         this->times = nullptr;
     }
 }
-
+void TimestampColumnVector::add(int64_t val){
+    if(writeIndex>=length){
+		ensureSize(writeIndex*2,1);
+	}
+	isNull[writeIndex]=false;
+	writeIndex++;
+}
+void TimestampColumnVector::add(int val){
+    if(writeIndex>=length){
+		ensureSize(writeIndex*2,1);
+	}
+	isNull[writeIndex]=false;
+    times[writeIndex]=  roundMillisToPrecision(val, precision);
+	writeIndex++;
+}
+void TimestampColumnVector::ensureSize(uint64_t size,bool presever){
+ColumnVector::ensureSize(size,presever);
+	if(size<=length){
+		return;
+	}
+	long* oldTS=times;
+	posix_memalign(reinterpret_cast<void **>(&times), 32,
+		size * sizeof(int64_t));
+	if(presever){
+		std::copy(oldTS,oldTS+length,times);
+	}
+	memoryUsage+= (uint64_t)sizeof(uint64_t)*(size-length);
+	resize(size);
+}
 
 void TimestampColumnVector::close() {
     if(!closed) {

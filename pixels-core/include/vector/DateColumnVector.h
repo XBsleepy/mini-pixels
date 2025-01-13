@@ -7,6 +7,7 @@
 
 #include "vector/ColumnVector.h"
 #include "vector/VectorizedRowBatch.h"
+#include <sstream>
 
 class DateColumnVector: public ColumnVector {
 public:
@@ -27,6 +28,10 @@ public:
 	void print(int rowCount) override;
 	void close() override;
 	void set(int elementNum, int days);
+	void ensureSize(uint64_t size, bool preserveData) override;
+	// int getLength();
+    void add(int value)override;
+	void add(std::string &val)override;
 };
 
 #endif // DUCKDB_DATECOLUMNVECTOR_H
