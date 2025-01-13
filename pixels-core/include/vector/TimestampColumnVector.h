@@ -29,7 +29,7 @@ public:
     void ensureSize(uint64_t size, bool preserver) override;
     void add(int64_t val) override;
     void add(int val) override;
-
+    void add(std::string &val) override;
     long roundMicrosToPrecision(long micros, int precision)
     {
         std::array<long, 7> PRECISION_ROUND_FACTOR_FOR_MICROS = {

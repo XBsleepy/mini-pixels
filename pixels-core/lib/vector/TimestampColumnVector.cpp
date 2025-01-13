@@ -3,19 +3,22 @@
 //
 
 #include "vector/TimestampColumnVector.h"
-
+#include <iostream>
+#include <sstream>
+#include <iomanip>
+#include <ctime>
+#include <chrono>
 TimestampColumnVector::TimestampColumnVector(int precision, bool encoding): ColumnVector(VectorizedRowBatch::DEFAULT_SIZE, encoding) {
     TimestampColumnVector(VectorizedRowBatch::DEFAULT_SIZE, precision, encoding);
 }
 
 TimestampColumnVector::TimestampColumnVector(uint64_t len, int precision, bool encoding): ColumnVector(len, encoding) {
     this->precision = precision;
-    if(encoding) {
-        posix_memalign(reinterpret_cast<void **>(&this->times), 64,
+
+    posix_memalign(reinterpret_cast<void **>(&this->times), 64,
                        len * sizeof(long));
-    } else {
-        this->times = nullptr;
-    }
+    memoryUsage += (long)sizeof(long) * len;
+
 }
 void TimestampColumnVector::add(int64_t val){
     if(writeIndex>=length){
@@ -31,6 +34,27 @@ void TimestampColumnVector::add(int val){
 	isNull[writeIndex]=false;
     times[writeIndex]=  roundMillisToPrecision(val, precision);
 	writeIndex++;
+}
+void TimestampColumnVector::add(std::string & val){
+    std::istringstream ss(val);
+    char t;
+    long ts;
+   	struct tm time = {};
+    int year,month,day,hour,minute,second,millis;
+    ss>>year>>t>>month>>t>>day>>t>>hour>>t>>minute>>t>>second>>t>>millis;
+    time.tm_year = year - 1900;
+    time.tm_mon = month - 1;
+    time.tm_mday = day;
+    time.tm_hour = hour;
+    time.tm_min = minute;
+    time.tm_sec = second;
+    time.tm_isdst = -1;
+
+    ts = mktime(&time);
+    if(ts == -1){
+        throw InvalidArgumentException("Error converting to timestamp!");
+    }
+    add(ts*1000+millis);
 }
 void TimestampColumnVector::ensureSize(uint64_t size,bool presever){
 ColumnVector::ensureSize(size,presever);
