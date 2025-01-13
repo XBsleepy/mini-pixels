@@ -31,14 +31,12 @@ void DateColumnVector::add(std::string &val)
 {
 	int year, month, day;
 
-	// 用字符串流手动解析
 	std::istringstream ss(val);
 
-	// 用 "-" 作为分隔符分割日期
+	
 	char dash1, dash2;
 	ss >> year >> dash1 >> month >> dash2 >> day;
 
-	// 检查分隔符是否正确
 	if (ss.fail() || dash1 != '-' || dash2 != '-')
 	{
 		std::cerr << "Invalid date format!" << std::endl;
