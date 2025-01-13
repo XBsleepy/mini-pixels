@@ -24,8 +24,9 @@ DateColumnWriter::DateColumnWriter(std::shared_ptr<TypeDescription> type, std::s
     runlengthEncoding = encodingLevel.ge(EncodingLevel::Level::EL2);
     if (runlengthEncoding)
     {
-        encoder = std::make_unique<RunLenIntEncoder>();
+        encoder = std::make_unique<RunLenIntEncoder>(1,1);
     }
+    curPixelVector.resize(pixelStride);
 }
 
 int DateColumnWriter::write(std::shared_ptr<ColumnVector> vector, int size)
@@ -74,7 +75,7 @@ void DateColumnWriter::writeCurPartTime(std::shared_ptr<ColumnVector> columnVect
             if (nullsPadding)
             {
                 // padding 0 for nulls
-                curPixelVector[curPixelVectorIndex++] = 0;
+                curPixelVector[curPixelVectorIndex++] = 0l;
             }
         }
         else
@@ -90,7 +91,7 @@ void DateColumnWriter::newPixel()
 {
     if (runlengthEncoding)
     {
-        std::vector<byte> buffer(curPixelEleIndex * sizeof(int));
+        std::vector<byte> buffer(curPixelVectorIndex * sizeof(int));
         int resLen;
         encoder->encode(curPixelVector.data(), buffer.data(), curPixelVectorIndex, resLen);
         outputStream->putBytes(buffer.data(), resLen);

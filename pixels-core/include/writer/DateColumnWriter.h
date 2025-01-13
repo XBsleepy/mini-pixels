@@ -42,7 +42,7 @@ class DateColumnWriter : public ColumnWriter{
 private:
     bool runlengthEncoding;
     std::unique_ptr<RunLenIntEncoder> encoder;
-    std::vector<long> curPixelVector; // current pixel value vector haven't written out yet
+    std::vector<int> curPixelVector; // current pixel value vector haven't written out yet
 
 };
 #endif // DUCKDB_DATECOLUMNWRITER_H

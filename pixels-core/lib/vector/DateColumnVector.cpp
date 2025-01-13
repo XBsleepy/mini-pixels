@@ -7,6 +7,7 @@
 #include <iomanip> // 需要 std::get_time
 #include <sstream>
 #include <ctime>
+#include <chrono>
 DateColumnVector::
 DateColumnVector(uint64_t len, bool encoding) : ColumnVector(len, encoding)
 {
@@ -27,6 +28,7 @@ void DateColumnVector::add(int value)
 	isNull[writeIndex] = false;
 	writeIndex++;
 }
+
 void DateColumnVector::add(std::string &val)
 {
 	int year, month, day;
@@ -48,16 +50,18 @@ void DateColumnVector::add(std::string &val)
 	time.tm_year = year - 1900; // tm_year 从1900年开始
 	time.tm_mon = month - 1;	// tm_mon 范围是 0-11，所以需要减去1
 	time.tm_mday = day;
-
+	time.tm_isdst=-1;
 	// 将 tm 结构体转换为时间戳（秒）
 	time_t timestamp = mktime(&time);
-
-	if (timestamp == -1)
-	{
-		std::cerr << "Error converting to timestamp!" << std::endl;
-		return;
-	}
-	this->add(timestamp);
+	std::tm epoch = {0};
+	epoch.tm_year = 70;
+	epoch.tm_mon = 0;
+	epoch.tm_mday = 1;
+	long epoch_ts = mktime(&epoch);
+	std::chrono::system_clock::time_point tp = std::chrono::system_clock::from_time_t(timestamp);
+	std::chrono::system_clock::time_point epoch_tp = std::chrono::system_clock::from_time_t(epoch_ts);
+	auto days=std::chrono::duration_cast<std::chrono::hours>(tp-epoch_tp).count()/24;
+	this->add(days);
 }
 void DateColumnVector::ensureSize(uint64_t size, bool preserveData)
 {

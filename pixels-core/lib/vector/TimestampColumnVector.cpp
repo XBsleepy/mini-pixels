@@ -51,6 +51,14 @@ void TimestampColumnVector::add(std::string & val){
     time.tm_isdst = -1;
 
     ts = mktime(&time);
+    //unix timestamp, make a diff to 1970-01-01 00:00:00
+    struct tm epoch = {0};
+    epoch.tm_year = 70;
+    epoch.tm_mon = 0;
+    epoch.tm_mday = 1;
+    long epoch_ts = mktime(&epoch);
+    ts -= epoch_ts;
+    
     if(ts == -1){
         throw InvalidArgumentException("Error converting to timestamp!");
     }
