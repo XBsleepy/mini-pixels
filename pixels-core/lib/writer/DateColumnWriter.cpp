@@ -23,7 +23,6 @@ DateColumnWriter::DateColumnWriter(std::shared_ptr<TypeDescription> type, std::s
     : ColumnWriter(type, writerOption), curPixelVector(pixelStride)
 {
     runlengthEncoding = encodingLevel.ge(EncodingLevel::Level::EL2);
-    runlengthEncoding = 0;
     if (runlengthEncoding)
     {
         encoder = std::make_unique<RunLenIntEncoder>(1, 1);
@@ -130,6 +129,7 @@ pixels::proto::ColumnEncoding DateColumnWriter::getColumnChunkEncoding()
     }
     return columnEncoding;
 }
+
 bool DateColumnWriter::decideNullsPadding(std::shared_ptr<PixelsWriterOption> writerOption)
 {
     if (writerOption->getEncodingLevel().ge(EncodingLevel::Level::EL2))
