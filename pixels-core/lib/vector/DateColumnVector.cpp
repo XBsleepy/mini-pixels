@@ -3,17 +3,80 @@
 //
 
 #include "vector/DateColumnVector.h"
-
+#include <chrono>
+#include <iostream>
+#include <sstream>
+#include <ctime>
 DateColumnVector::DateColumnVector(uint64_t len, bool encoding): ColumnVector(len, encoding) {
-	if(encoding) {
-        posix_memalign(reinterpret_cast<void **>(&dates), 32,
-                       len * sizeof(int32_t));
-	} else {
-		this->dates = nullptr;
-	}
+	// if(encoding) {
+	posix_memalign(reinterpret_cast<void **>(&dates), 32,
+					len * sizeof(int32_t));
+	// } else {
+		// this->dates = nullptr;
+	// }
 	memoryUsage += (long) sizeof(int) * len;
 }
 
+void DateColumnVector::add(std::string &val)
+{
+        int year, month, day;
+
+        std::istringstream ss(val);
+
+
+        char dash1, dash2;
+        ss >> year >> dash1 >> month >> dash2 >> day;
+
+        if (ss.fail() || dash1 != '-' || dash2 != '-')
+        {
+                std::cerr << "Invalid date format!" << std::endl;
+                return;
+        }
+
+        // 填充 std::tm 结构体
+        struct tm time = {};
+        time.tm_year = year - 1900; // tm_year 从1900年开始
+        time.tm_mon = month - 1;        // tm_mon 范围是 0-11，所以需要减去1
+        time.tm_mday = day;
+        time.tm_isdst=-1;
+        // 将 tm 结构体转换为时间戳（秒）
+        time_t timestamp = mktime(&time);
+        std::tm epoch = {0};
+        epoch.tm_year = 70;
+        epoch.tm_mon = 0;
+        epoch.tm_mday = 1;
+        long epoch_ts = mktime(&epoch);
+        std::chrono::system_clock::time_point tp = std::chrono::system_clock::from_time_t(timestamp);
+        std::chrono::system_clock::time_point epoch_tp = std::chrono::system_clock::from_time_t(epoch_ts);
+        auto days=std::chrono::duration_cast<std::chrono::hours>(tp-epoch_tp).count()/24;
+        this->add((int)days);
+}
+void DateColumnVector::add(bool value) {
+	add(value ? 1 : 0);
+}
+
+void DateColumnVector::add(int value) {
+	if (writeIndex >= length) {
+		ensureSize(writeIndex * 2, true);
+	}
+	set(writeIndex++, value);
+}
+
+void DateColumnVector::ensureSize(uint64_t size, bool preserveData) {
+	ColumnVector::ensureSize(size, preserveData);
+	if (length < size) {
+		int *oldVector = dates;
+		posix_memalign(reinterpret_cast<void **>(&dates), 32,
+					   size * sizeof(int));
+		if (preserveData) {
+			std::copy(oldVector, oldVector + length, dates);
+		}
+		delete[] oldVector;
+		memoryUsage += (long) sizeof(long) * (size - length);
+		resize(size);
+	}
+	}
+			
 void DateColumnVector::close() {
 	if(!closed) {
 		if(encoding && dates != nullptr) {
@@ -48,6 +111,7 @@ void DateColumnVector::set(int elementNum, int days) {
 		writeIndex = elementNum + 1;
 	}
 	dates[elementNum] = days;
+	isNull[elementNum] = false;
 	// TODO: isNull
 }
 
