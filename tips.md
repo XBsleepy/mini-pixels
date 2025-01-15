@@ -27,7 +27,7 @@ git clone 之后，需要执行`make pull`，make pull会拉取所有的子模�
 
 ## tips
 1. 为了方便debug，最好编译debug版本，这样gdb更好用。
-2. 目前为止还有一个date类型的writer的指针问题还没合入master，需要把有一个函数的long*改成int*。
+2. 目前为止还有一个date类型的writer的指针问题还没合入master，需要把有一个函数的long*改成int*。（现在的版本已改）底层的存储，date是int类型，timestamp和decimal是long类型。
 3. debug版本的ub会直接报错，会导致integer类型的负数无法正确写入，但应该没关系。
 4. pdf中说的-n参数指定最大行数的表述大概有一些问题，因为目前的cli并不会写多个文件，当行数超过-n时并不会默认开一个新的，而是会生成一个无法读取的文件，并且cli不会报错，小心点。
 5. 在修改代码后，通常可以直接到/mini-pixels目录下执行`make -j debug`。并且能正确更新可执行文件。不到万不得已最好不要直接`make clean`，因为会把所有的东西都删掉，重新编译会很慢，因为有duckdb。
@@ -35,3 +35,4 @@ git clone 之后，需要执行`make pull`，make pull会拉取所有的子模�
 7. 因为没有官方的测试文件，手动生成的时候请不要手抖，如果在末尾增加了几个空行，会导致`segmentation fault`，或者是`runtime error`，小心点。
 8. 任务三的表述有点奇怪，我个人觉得那不是说你要写什么，而是在你完成前两步，成功make并且pixel-cli load不报错之后，用之前提到的编译出来的duckdb执行测试，看看自己有没有写对。
 9. 建议虚函数全部加上override，这样编译器会帮你检查是否override正确。
+10. 目前的timestamp的precision没用，duckdb读取的时候默认是秒*1e6对应的long。
