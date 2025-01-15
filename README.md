@@ -30,6 +30,8 @@ mini-pixels 目前用于中国人民大学 **实用数据库开发** 课程的�
 
 如果在实验过程中遇到问题可以在 Discussions 中讨论或提交 Issue。
 
+可以看[tips](./tips.md)，里面有一些实验2的相关内容。
+
 同学也可以通过提交 **Issue** 和 **Pull Request** 来贡献代码和提出改进建议，帮助完善 mini-pixels。
 
 ## 致谢
