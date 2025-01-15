@@ -63,9 +63,16 @@ void DecimalColumnVector::add(std::string &val)
     // round up
     if(cnt>scale){
         long t=value%10;
+        if(value>0){
         value/=10;
         if(t>=5){
             value++;
+        }}
+        else{
+            value/=10;
+            if(t<=-5){
+                value--;
+            }
         }
     }
     //add zeros if needed

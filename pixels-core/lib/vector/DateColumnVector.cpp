@@ -32,14 +32,11 @@ void DateColumnVector::add(std::string &val)
                 std::cerr << "Invalid date format!" << std::endl;
                 return;
         }
-
-        // 填充 std::tm 结构体
         struct tm time = {};
-        time.tm_year = year - 1900; // tm_year 从1900年开始
-        time.tm_mon = month - 1;        // tm_mon 范围是 0-11，所以需要减去1
+        time.tm_year = year - 1900; 
+        time.tm_mon = month - 1;       
         time.tm_mday = day;
         time.tm_isdst=-1;
-        // 将 tm 结构体转换为时间戳（秒）
         time_t timestamp = mktime(&time);
         std::tm epoch = {0};
         epoch.tm_year = 70;
